@@ -2,266 +2,299 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slot Master - Telegram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Slot Master Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent: #f1c40f;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --tab-inactive: #888;
+        }
+
         body {
-            background-color: #1a1a1a;
+            background-color: var(--bg-color);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
-            margin: 0;
             overflow: hidden;
         }
 
-        .balance-card {
-            background: linear-gradient(45deg, #2ecc71, #27ae60);
-            padding: 10px 30px;
-            border-radius: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        /* Sayfa Yapısı */
+        .page {
+            display: none;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Slot Machine Design */
+        .active-page { display: flex; }
+
+        /* Üst Bakiye */
+        .header-balance {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            width: 90%;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+
+        /* 1. SAYFA: SLOT MAKİNESİ */
         .machine-body {
             background: #444;
             border: 8px solid #666;
             border-radius: 40px 40px 15px 15px;
             padding: 20px;
-            position: relative;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            margin-top: 20px;
         }
-
-        .header-deco {
-            width: 180px;
-            height: 70px;
-            background: #f1c40f;
-            margin: -20px auto 15px;
-            border-radius: 100px 100px 0 0;
-            border: 4px solid #d35400;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            color: #d35400;
-            text-shadow: 1px 1px 0 white;
-        }
-
         .slot-window {
             display: flex;
             gap: 10px;
             background: #222;
             padding: 15px;
             border-radius: 10px;
-            border: 4px solid #111;
         }
-
         .reel {
-            width: 70px;
-            height: 90px;
-            background: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 45px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            width: 70px; height: 90px;
+            background: white; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 45px; color: #333;
         }
+        .btn {
+            border: none; color: white; padding: 15px 30px;
+            border-radius: 30px; font-weight: bold; font-size: 16px;
+            width: 250px; margin-top: 15px;
+        }
+        .spin-btn { background: var(--danger); box-shadow: 0 4px #c0392b; }
+        .ad-btn { background: #3498db; box-shadow: 0 4px #2980b9; }
 
-        /* Buttons */
-        .controls {
-            margin-top: 25px;
+        /* 2. SAYFA: ÖDEME */
+        .payment-form {
+            width: 100%;
+            max-width: 300px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            align-items: center;
         }
-
-        .btn {
-            border: none;
+        input {
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #222;
             color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 200px;
-            padding: 15px;
-            border-radius: 50px;
-            font-size: 18px;
         }
 
-        .spin-btn {
-            background: #e74c3c;
-            box-shadow: 0 5px 0 #c0392b;
+        /* 3. SAYFA: PROFİL */
+        .stats-card {
+            background: var(--card-bg);
+            width: 90%;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
         }
 
-        .spin-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #c0392b;
-        }
-
-        .ad-btn {
-            background: #3498db;
-            box-shadow: 0 5px 0 #2980b9;
-        }
-
-        .btn:disabled {
-            background: #7f8c8d !important;
-            box-shadow: 0 5px 0 #34495e !important;
-            opacity: 0.6;
-        }
-
-        #status-msg {
-            margin-top: 15px;
-            font-weight: bold;
-            min-height: 20px;
-            color: #f1c40f;
-        }
-
-        /* Overlay for Fake Ad */
-        #ad-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            z-index: 100;
-            justify-content: center;
+        /* ALT TAB BAR */
+        .tab-bar {
+            background: #1a1a1a;
+            height: 70px;
+            display: flex;
+            justify-content: space-around;
             align-items: center;
+            border-top: 1px solid #333;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--tab-inactive);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tab-item.active { color: var(--accent); }
+        .tab-icon { font-size: 24px; margin-bottom: 4px; }
+
+        /* Reklam Overlay */
+        #ad-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; z-index: 1000; justify-content: center; align-items: center;
             flex-direction: column;
         }
     </style>
 </head>
 <body>
 
-    <div class="balance-card">$<span id="balance">0.00</span></div>
+    <div class="header-balance">$<span id="balance">0.000</span></div>
 
-    <div class="machine-body">
-        <div class="header-deco">WINNER SLOT</div>
-        <div class="slot-window">
-            <div class="reel" id="r1">7</div>
-            <div class="reel" id="r2">7</div>
-            <div class="reel" id="r3">7</div>
+    <div id="page-home" class="page active-page">
+        <div class="machine-body">
+            <div class="slot-window">
+                <div class="reel" id="r1">7</div>
+                <div class="reel" id="r2">7</div>
+                <div class="reel" id="r3">7</div>
+            </div>
+        </div>
+        <div id="status-msg" style="margin-top: 15px; color: var(--accent); font-weight: bold;">Hak alarak başla!</div>
+        <button class="btn spin-btn" id="spinBtn" onclick="playSlot()" disabled>ÇEVİR (0 Hak)</button>
+        <button class="btn ad-btn" onclick="showAd()">REKLAM İZLE (+1 HAK)</button>
+    </div>
+
+    <div id="page-payment" class="page">
+        <h3>Ödeme Talebi</h3>
+        <div class="payment-form">
+            <label>USDT (TRC20) Adresi:</label>
+            <input type="text" id="wallet-address" placeholder="T..." maxlength="42">
+            <label>Çekilecek Miktar ($):</label>
+            <input type="number" id="withdraw-amount" placeholder="0.00">
+            <button class="btn ad-btn" onclick="requestPayment()">TALEP GÖNDER</button>
+        </div>
+        <p style="font-size: 12px; color: #888; margin-top: 20px;">Minimum çekim: $10.00</p>
+    </div>
+
+    <div id="page-profile" class="page">
+        <h3>Profil İstatistiklerim</h3>
+        <div class="stats-card">
+            <div class="stat-item"><span>Toplam Reklam:</span> <span id="stat-ads">0</span></div>
+            <div class="stat-item"><span>Toplam Çevirme:</span> <span id="stat-spins">0</span></div>
+            <div class="stat-item"><span>Toplam Kazanç:</span> <span id="stat-earnings">$0.00</span></div>
+        </div>
+        <button class="btn spin-btn" onclick="tg.close()">UYGULAMADAN ÇIK</button>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab-item active" onclick="showPage('home', this)">
+            <div class="tab-icon">🎰</div><div>Oyna</div>
+        </div>
+        <div class="tab-item" onclick="showPage('payment', this)">
+            <div class="tab-icon">💰</div><div>Ödeme</div>
+        </div>
+        <div class="tab-item" onclick="showPage('profile', this)">
+            <div class="tab-icon">👤</div><div>Profilim</div>
         </div>
     </div>
 
-    <div id="status-msg">Oynamak için hak al!</div>
-
-    <div class="controls">
-        <button class="btn spin-btn" id="spinBtn" onclick="playSlot()" disabled>ÇEVİR (Hakkın Yok)</button>
-        <button class="btn ad-btn" id="adBtn" onclick="showAd()">REKLAM İZLE (+1 HAK)</button>
-    </div>
-
     <div id="ad-overlay">
-        <h2 id="ad-timer">Reklam İzleniyor: 5s</h2>
-        <p>Hakkın tanımlanması için bekle...</p>
+        <h2 id="ad-timer">Reklam İzleniyor...</h2>
+        <div style="font-size: 50px;">📺</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let balance = 0.00;
-        let spinsLeft = 0;
-        
-        // Ödül Tablosu ve Semboller
-        const prizeTable = {
-            '💎': 2.00,
-            '7': 1.00,
-            '🍋': 0.70,
-            '🔔': 0.02,
-            '🍒': 0.009
+        // Veriler
+        let data = {
+            balance: 0.000,
+            spinsLeft: 0,
+            totalAds: 0,
+            totalSpins: 0,
+            totalEarnings: 0
         };
+
+        const prizeTable = { '💎': 2.00, '7': 1.00, '🍋': 0.70, '🔔': 0.02, '🍒': 0.009 };
         const symbols = Object.keys(prizeTable);
 
-        const spinBtn = document.getElementById('spinBtn');
-        const adBtn = document.getElementById('adBtn');
-        const statusMsg = document.getElementById('status-msg');
+        // Sayfa Geçiş Fonksiyonu
+        function showPage(pageId, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById('page-' + pageId).classList.add('active-page');
+            el.classList.add('active');
+            updateUI();
+        }
 
-        // Reklam İzleme Fonksiyonu
+        // Reklam İzleme
         function showAd() {
             const overlay = document.getElementById('ad-overlay');
-            const timerText = document.getElementById('ad-timer');
             overlay.style.display = 'flex';
-            adBtn.disabled = true;
-
-            let timeLeft = 5; // 5 saniyelik simüle reklam
-            const interval = setInterval(() => {
-                timeLeft--;
-                timerText.innerText = `Reklam İzleniyor: ${timeLeft}s`;
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
+            let sec = 5;
+            
+            const timer = setInterval(() => {
+                sec--;
+                document.getElementById('ad-timer').innerText = `Kalan: ${sec}s`;
+                if (sec <= 0) {
+                    clearInterval(timer);
                     overlay.style.display = 'none';
-                    spinsLeft++;
+                    data.spinsLeft++;
+                    data.totalAds++;
                     updateUI();
-                    statusMsg.innerText = "Hak tanımlandı! Çevirebilirsin.";
                     tg.HapticFeedback.notificationOccurred('success');
                 }
             }, 1000);
         }
 
-        function updateUI() {
-            document.getElementById('balance').innerText = balance.toFixed(3);
-            if (spinsLeft > 0) {
-                spinBtn.disabled = false;
-                spinBtn.innerText = `ÇEVİR (${spinsLeft} Hak)`;
-                adBtn.disabled = false;
-            } else {
-                spinBtn.disabled = true;
-                spinBtn.innerText = "ÇEVİR (Hakkın Yok)";
-                adBtn.disabled = false;
-            }
-        }
-
+        // Slot Oynama
         function playSlot() {
-            if (spinsLeft <= 0) return;
+            if (data.spinsLeft <= 0) return;
             
-            spinsLeft--;
+            data.spinsLeft--;
+            data.totalSpins++;
             updateUI();
-            spinBtn.disabled = true;
-            statusMsg.innerText = "Şansın dönüyor...";
-
+            
+            document.getElementById('spinBtn').disabled = true;
             let count = 0;
             const reels = [document.getElementById('r1'), document.getElementById('r2'), document.getElementById('r3')];
             
             const shuffle = setInterval(() => {
-                reels.forEach(r => {
-                    r.innerText = symbols[Math.floor(Math.random() * symbols.length)];
-                });
+                reels.forEach(r => r.innerText = symbols[Math.floor(Math.random() * symbols.length)]);
                 count++;
                 if (count > 15) {
                     clearInterval(shuffle);
-                    determineResult(reels);
+                    const final = reels.map(r => r.innerText);
+                    if (final[0] === final[1] && final[1] === final[2]) {
+                        const win = prizeTable[final[0]];
+                        data.balance += win;
+                        data.totalEarnings += win;
+                        tg.HapticFeedback.notificationOccurred('success');
+                        alert("KAZANDIN! $" + win);
+                    } else {
+                        tg.HapticFeedback.impactOccurred('medium');
+                    }
+                    updateUI();
                 }
             }, 70);
         }
 
-        function determineResult(reels) {
-            const final = reels.map(r => r.innerText);
-            
-            // Kazanma kontrolü
-            if (final[0] === final[1] && final[1] === final[2]) {
-                const winSymbol = final[0];
-                const prize = prizeTable[winSymbol];
-                balance += prize;
-                statusMsg.style.color = "#2ecc71";
-                statusMsg.innerText = `TEBRİKLER! ${winSymbol} ile $${prize} kazandın!`;
-                tg.HapticFeedback.notificationOccurred('success');
+        function requestPayment() {
+            const addr = document.getElementById('wallet-address').value;
+            const amount = document.getElementById('withdraw-amount').value;
+            if(addr.length < 10 || amount < 10) {
+                alert("Hata: Minimum $10 ve geçerli bir adres gerekli.");
             } else {
-                statusMsg.style.color = "#f1c40f";
-                statusMsg.innerText = "Tekrar dene!";
-                tg.HapticFeedback.impactOccurred('medium');
+                alert("Ödeme talebiniz alındı! (Simülasyon)");
             }
+        }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = data.balance.toFixed(3);
+            document.getElementById('spinBtn').innerText = `ÇEVİR (${data.spinsLeft} Hak)`;
+            document.getElementById('spinBtn').disabled = data.spinsLeft <= 0;
             
-            updateUI();
+            // Profil İstatistikleri
+            document.getElementById('stat-ads').innerText = data.totalAds;
+            document.getElementById('stat-spins').innerText = data.totalSpins;
+            document.getElementById('stat-earnings').innerText = "$" + data.totalEarnings.toFixed(3);
         }
     </script>
 </body>
