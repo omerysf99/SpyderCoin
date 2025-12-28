@@ -3,103 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Slot Machine</title>
+    <title>Slot Master - Telegram</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #2c3e50;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            font-family: 'Arial', sans-serif;
-            color: white;
+            overflow: hidden;
         }
 
-        .balance-container {
+        .balance-card {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            padding: 10px 30px;
+            border-radius: 15px;
             font-size: 24px;
+            font-weight: bold;
             margin-bottom: 20px;
-            background: rgba(0,0,0,0.3);
-            padding: 10px 20px;
-            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* Slot Makinesi Kasası */
-        .machine {
-            background: #bdc3c7;
-            border: 10px solid #7f8c8d;
-            border-radius: 50px 50px 10px 10px;
+        /* Slot Machine Design */
+        .machine-body {
+            background: #444;
+            border: 8px solid #666;
+            border-radius: 40px 40px 15px 15px;
             padding: 20px;
             position: relative;
-            box-shadow: 0 10px 0 #34495e;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
 
-        /* Üstteki Portakal/Güneş Kısmı */
-        .top-deco {
-            width: 200px;
-            height: 100px;
+        .header-deco {
+            width: 180px;
+            height: 70px;
             background: #f1c40f;
+            margin: -20px auto 15px;
             border-radius: 100px 100px 0 0;
-            margin: -20px auto 10px;
-            border: 5px solid #f39c12;
+            border: 4px solid #d35400;
             display: flex;
             justify-content: center;
-            align-items: flex-end;
-            overflow: hidden;
-            position: relative;
+            align-items: center;
+            font-weight: bold;
+            color: #d35400;
+            text-shadow: 1px 1px 0 white;
         }
 
-        .top-deco::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: repeating-conic-gradient(from 0deg, transparent 0 30deg, #e67e22 30deg 60deg);
-            opacity: 0.3;
-        }
-
-        /* Slot Ekranı */
-        .slot-container {
+        .slot-window {
             display: flex;
-            background: #34495e;
+            gap: 10px;
+            background: #222;
             padding: 15px;
             border-radius: 10px;
-            gap: 10px;
-            border: 5px solid #2c3e50;
+            border: 4px solid #111;
         }
 
         .reel {
-            width: 60px;
-            height: 80px;
+            width: 70px;
+            height: 90px;
             background: white;
-            border-radius: 5px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 50px;
-            font-weight: bold;
-            color: #e74c3c;
-            overflow: hidden;
+            font-size: 45px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
         }
 
-        /* Kol ve Düğme */
-        .button-container {
-            margin-top: 30px;
+        /* Buttons */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 200px;
+            padding: 15px;
+            border-radius: 50px;
+            font-size: 18px;
         }
 
         .spin-btn {
             background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 15px 50px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
             box-shadow: 0 5px 0 #c0392b;
-            transition: 0.1s;
         }
 
         .spin-btn:active {
@@ -107,95 +106,162 @@
             box-shadow: 0 2px 0 #c0392b;
         }
 
-        .spin-btn:disabled {
-            background: #95a5a6;
-            box-shadow: 0 5px 0 #7f8c8d;
+        .ad-btn {
+            background: #3498db;
+            box-shadow: 0 5px 0 #2980b9;
         }
 
-        /* Kazandın Mesajı */
-        #message {
-            margin-top: 20px;
-            height: 24px;
+        .btn:disabled {
+            background: #7f8c8d !important;
+            box-shadow: 0 5px 0 #34495e !important;
+            opacity: 0.6;
+        }
+
+        #status-msg {
+            margin-top: 15px;
             font-weight: bold;
-            color: #2ecc71;
+            min-height: 20px;
+            color: #f1c40f;
+        }
+
+        /* Overlay for Fake Ad */
+        #ad-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
         }
     </style>
 </head>
 <body>
 
-    <div class="balance-container">
-        Bakiye: $<span id="balance">0.00</span>
-    </div>
+    <div class="balance-card">$<span id="balance">0.00</span></div>
 
-    <div class="machine">
-        <div class="top-deco"></div>
-        <div class="slot-container">
-            <div class="reel" id="reel1">7</div>
-            <div class="reel" id="reel2">7</div>
-            <div class="reel" id="reel3">7</div>
+    <div class="machine-body">
+        <div class="header-deco">WINNER SLOT</div>
+        <div class="slot-window">
+            <div class="reel" id="r1">7</div>
+            <div class="reel" id="r2">7</div>
+            <div class="reel" id="r3">7</div>
         </div>
     </div>
 
-    <div id="message"></div>
+    <div id="status-msg">Oynamak için hak al!</div>
 
-    <div class="button-container">
-        <button class="spin-btn" onclick="spin()" id="spinBtn">ÇEVİR</button>
+    <div class="controls">
+        <button class="btn spin-btn" id="spinBtn" onclick="playSlot()" disabled>ÇEVİR (Hakkın Yok)</button>
+        <button class="btn ad-btn" id="adBtn" onclick="showAd()">REKLAM İZLE (+1 HAK)</button>
+    </div>
+
+    <div id="ad-overlay">
+        <h2 id="ad-timer">Reklam İzleniyor: 5s</h2>
+        <p>Hakkın tanımlanması için bekle...</p>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Uygulamayı tam ekran yap
+        tg.expand();
 
-        let balance = 0;
-        const symbols = ['7', '🍒', '🍋', '🔔', '💎'];
-        const reels = [
-            document.getElementById('reel1'),
-            document.getElementById('reel2'),
-            document.getElementById('reel3')
-        ];
-        const balanceDisplay = document.getElementById('balance');
-        const messageDisplay = document.getElementById('message');
+        let balance = 0.00;
+        let spinsLeft = 0;
+        
+        // Ödül Tablosu ve Semboller
+        const prizeTable = {
+            '💎': 2.00,
+            '7': 1.00,
+            '🍋': 0.70,
+            '🔔': 0.02,
+            '🍒': 0.009
+        };
+        const symbols = Object.keys(prizeTable);
+
         const spinBtn = document.getElementById('spinBtn');
+        const adBtn = document.getElementById('adBtn');
+        const statusMsg = document.getElementById('status-msg');
 
-        function spin() {
-            // Butonu kilitle ve mesajı temizle
-            spinBtn.disabled = true;
-            messageDisplay.innerText = "";
-            
-            let counts = 0;
+        // Reklam İzleme Fonksiyonu
+        function showAd() {
+            const overlay = document.getElementById('ad-overlay');
+            const timerText = document.getElementById('ad-timer');
+            overlay.style.display = 'flex';
+            adBtn.disabled = true;
+
+            let timeLeft = 5; // 5 saniyelik simüle reklam
             const interval = setInterval(() => {
-                reels.forEach(reel => {
-                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                    reel.innerText = randomSymbol;
-                });
-                counts++;
-
-                if (counts > 20) {
+                timeLeft--;
+                timerText.innerText = `Reklam İzleniyor: ${timeLeft}s`;
+                if (timeLeft <= 0) {
                     clearInterval(interval);
-                    finalizeResult();
+                    overlay.style.display = 'none';
+                    spinsLeft++;
+                    updateUI();
+                    statusMsg.innerText = "Hak tanımlandı! Çevirebilirsin.";
+                    tg.HapticFeedback.notificationOccurred('success');
                 }
-            }, 50);
+            }, 1000);
         }
 
-        function finalizeResult() {
-            const results = [];
-            reels.forEach(reel => {
-                const finalSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                reel.innerText = finalSymbol;
-                results.push(finalSymbol);
-            });
+        function updateUI() {
+            document.getElementById('balance').innerText = balance.toFixed(3);
+            if (spinsLeft > 0) {
+                spinBtn.disabled = false;
+                spinBtn.innerText = `ÇEVİR (${spinsLeft} Hak)`;
+                adBtn.disabled = false;
+            } else {
+                spinBtn.disabled = true;
+                spinBtn.innerText = "ÇEVİR (Hakkın Yok)";
+                adBtn.disabled = false;
+            }
+        }
 
-            // Kazanma kontrolü: 7-7-7
-            if (results.every(val => val === '7')) {
-                balance += 1.00;
-                balanceDisplay.innerText = balance.toFixed(2);
-                messageDisplay.innerText = "TEBRİKLER! +$1 KAZANDIN!";
+        function playSlot() {
+            if (spinsLeft <= 0) return;
+            
+            spinsLeft--;
+            updateUI();
+            spinBtn.disabled = true;
+            statusMsg.innerText = "Şansın dönüyor...";
+
+            let count = 0;
+            const reels = [document.getElementById('r1'), document.getElementById('r2'), document.getElementById('r3')];
+            
+            const shuffle = setInterval(() => {
+                reels.forEach(r => {
+                    r.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                });
+                count++;
+                if (count > 15) {
+                    clearInterval(shuffle);
+                    determineResult(reels);
+                }
+            }, 70);
+        }
+
+        function determineResult(reels) {
+            const final = reels.map(r => r.innerText);
+            
+            // Kazanma kontrolü
+            if (final[0] === final[1] && final[1] === final[2]) {
+                const winSymbol = final[0];
+                const prize = prizeTable[winSymbol];
+                balance += prize;
+                statusMsg.style.color = "#2ecc71";
+                statusMsg.innerText = `TEBRİKLER! ${winSymbol} ile $${prize} kazandın!`;
                 tg.HapticFeedback.notificationOccurred('success');
             } else {
-                tg.HapticFeedback.impactOccurred('light');
+                statusMsg.style.color = "#f1c40f";
+                statusMsg.innerText = "Tekrar dene!";
+                tg.HapticFeedback.impactOccurred('medium');
             }
-
-            spinBtn.disabled = false;
+            
+            updateUI();
         }
     </script>
 </body>
